@@ -1,0 +1,1068 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>レッスン準備</title>
+  <style>
+    :root {
+      --bg: #f3f5f8;
+      --panel: #ffffff;
+      --text: #1f2937;
+      --muted: #667085;
+      --line: #d7dde6;
+      --brand: #265b73;
+      --brand-dark: #1d4558;
+      --accent: #b94a48;
+      --ok: #12805c;
+      --shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      transition: transform 0.12s ease, background 0.12s ease, box-shadow 0.12s ease;
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.58;
+      transform: none;
+    }
+
+    .app {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 40px;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: max-content repeat(2, minmax(230px, 280px)) 200px 124px;
+      justify-content: center;
+      gap: 8px;
+      align-items: stretch;
+      padding: 0 18px;
+      margin-bottom: 16px;
+    }
+
+    .app-title,
+    .mode-button,
+    .typing-button,
+    .date-box {
+      min-height: 52px;
+    }
+
+    .app-title {
+      display: flex;
+      align-items: center;
+      padding: 0 8px 0 0;
+      color: #ff5858;
+      font-size: 32px;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .mode-button,
+    .typing-button {
+      color: #fff;
+      font-weight: 700;
+      padding: 10px 14px;
+      line-height: 1.25;
+    }
+
+    #scheduleModeButton {
+      background: #f04438;
+    }
+
+    #scheduleModeButton:hover,
+    #scheduleModeButton.active {
+      background: #e02d24;
+    }
+
+    #studentModeButton {
+      background: #2563eb;
+    }
+
+    #studentModeButton:hover,
+    #studentModeButton.active {
+      background: #1d4ed8;
+    }
+
+    .typing-button {
+      background: #111827;
+      padding-right: 6px;
+      padding-left: 6px;
+    }
+
+    .typing-button:hover {
+      background: #000;
+    }
+
+    .date-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+    }
+
+    .date-box label {
+      flex: 0 0 auto;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .date-box input {
+      width: 100%;
+      min-width: 0;
+      border: 0;
+      color: var(--text);
+      background: transparent;
+      font-weight: 700;
+      outline: none;
+    }
+
+    .settings {
+      display: grid;
+      grid-template-columns: minmax(260px, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      padding: 12px;
+      margin-bottom: 16px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .settings input {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 11px 12px;
+      outline: none;
+    }
+
+    .settings input:focus,
+    .student-search input:focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(29, 111, 143, 0.14);
+    }
+
+    .secondary-button {
+      min-height: 42px;
+      padding: 9px 14px;
+      color: #fff;
+      background: #475467;
+      border-radius: 7px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .secondary-button:hover {
+      background: #344054;
+    }
+
+    .error {
+      color: #b42318;
+      font-weight: 700;
+    }
+
+    .success {
+      color: var(--ok);
+      font-weight: 700;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .schools {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      padding: 14px;
+      margin-bottom: 16px;
+    }
+
+    .school-badge {
+      min-height: 38px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      color: var(--text);
+      background: #fff;
+      border: 2px solid var(--school-color, #b9dce7);
+      border-radius: 999px;
+      font-weight: 700;
+      box-shadow: none;
+    }
+
+    .school-badge::before {
+      width: 10px;
+      height: 10px;
+      content: "";
+      background: var(--school-color, var(--brand));
+      border-radius: 50%;
+    }
+
+    .school-line-break {
+      flex-basis: 100%;
+      height: 0;
+    }
+
+    .school-badge:hover,
+    .school-badge.active {
+      color: var(--school-contrast, #fff);
+      background: var(--school-color, var(--brand));
+      border-color: var(--school-color, var(--brand));
+    }
+
+    .schedule-layout {
+      display: grid;
+      grid-template-columns: minmax(300px, 420px) minmax(0, 1fr);
+      gap: 16px;
+    }
+
+    .list-panel,
+    .detail-panel,
+    .student-mode {
+      min-height: 420px;
+      padding: 16px;
+    }
+
+    .panel-title {
+      margin: 0 0 12px;
+      font-size: 18px;
+      line-height: 1.35;
+    }
+
+    .time-group + .time-group {
+      margin-top: 18px;
+    }
+
+    .time-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 8px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .student-card {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+      padding: 11px 12px;
+      color: var(--text);
+      background: #fbfcfe;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      text-align: left;
+    }
+
+    .student-card:hover,
+    .student-card.active {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(29, 111, 143, 0.12);
+    }
+
+    .student-name {
+      min-width: 0;
+      font-weight: 800;
+      overflow-wrap: anywhere;
+    }
+
+    .course-chip {
+      max-width: 140px;
+      padding: 3px 8px;
+      color: #1f2937;
+      background: #edf0f4;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .empty {
+      display: grid;
+      place-items: center;
+      min-height: 160px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.7;
+    }
+
+    .account-grid {
+      display: grid;
+      grid-template-columns: 150px 1fr;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+
+    .account-grid > div {
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+      overflow-wrap: anywhere;
+    }
+
+    .account-grid > div:nth-child(odd) {
+      color: var(--muted);
+      background: #f7f9fc;
+      font-weight: 800;
+    }
+
+    .account-grid > div:nth-last-child(-n + 2) {
+      border-bottom: 0;
+    }
+
+    .copy-field {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .copy-field-value {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .copy-field.copy-field-left {
+      grid-template-columns: auto minmax(0, 1fr);
+      justify-content: start;
+    }
+
+    .course-cell-name {
+      margin-bottom: 8px;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .copy-button,
+    .scratch-button,
+    .search-button {
+      min-height: 42px;
+      padding: 9px 14px;
+      color: #fff;
+      background: var(--brand);
+      border-radius: 7px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .copy-button:hover,
+    .scratch-button:hover,
+    .search-button:hover {
+      background: var(--brand-dark);
+    }
+
+    .scratch-button {
+      background: #8b3f9f;
+    }
+
+    .search-button {
+      background: #f97316;
+    }
+
+    .search-button:hover {
+      background: #ea580c;
+    }
+
+    .scratch-button:hover {
+      background: #6e2f80;
+    }
+
+    .student-search {
+      display: grid;
+      width: min(360px, 33%);
+      min-width: 300px;
+      grid-template-columns: minmax(180px, 1fr) auto;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .student-search input {
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 11px 12px;
+      outline: none;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      table-layout: fixed;
+    }
+
+    .student-account-table .course-column {
+      width: 36%;
+    }
+
+    .student-account-table .label-column {
+      width: 14%;
+    }
+
+    .student-account-table .value-column {
+      width: 50%;
+    }
+
+    .account-label-cell {
+      color: var(--muted);
+      background: #f7f9fc;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .student-account-table tbody tr.account-row-start > td {
+      border-top: 3px solid #98a2b3;
+    }
+
+    .student-account-table tbody tr.account-row-start:first-child > td {
+      border-top: 0;
+    }
+
+    th,
+    td {
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+      overflow-wrap: anywhere;
+    }
+
+    th {
+      color: var(--muted);
+      background: #f7f9fc;
+      font-size: 13px;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    @media (max-width: 860px) {
+      .topbar,
+      .settings,
+      .schedule-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .student-search {
+        width: 100%;
+        min-width: 0;
+        grid-template-columns: 1fr;
+      }
+
+      .topbar {
+        gap: 10px;
+      }
+
+      .list-panel,
+      .detail-panel,
+      .student-mode {
+        min-height: auto;
+      }
+
+      .account-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .account-grid > div:nth-last-child(-n + 2) {
+        border-bottom: 1px solid var(--line);
+      }
+
+      .account-grid > div:last-child {
+        border-bottom: 0;
+      }
+
+      .copy-field {
+        grid-template-columns: 1fr;
+      }
+
+      .copy-field.copy-field-left {
+        grid-template-columns: auto minmax(0, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <div class="topbar">
+      <div class="app-title">L-PAS</div>
+      <button id="scheduleModeButton" class="mode-button active" type="button">スケジュールからレッスン準備をする</button>
+      <button id="studentModeButton" class="mode-button" type="button">生徒IDからレッスン準備をする</button>
+      <div class="date-box">
+        <label for="lessonDate">日付</label>
+        <input id="lessonDate" type="date">
+      </div>
+      <button id="typingButton" class="typing-button" type="button">タイピングサイト</button>
+    </div>
+
+    <section id="apiSettings" class="settings" aria-label="キー設定">
+      <input id="apiKeyInput" type="password" autocomplete="off" placeholder="Key">
+      <button id="saveApiKeyButton" class="secondary-button" type="button">キー保存</button>
+    </section>
+
+    <section id="scheduleMode">
+      <div id="schoolList" class="schools panel"></div>
+      <div class="schedule-layout">
+        <section class="list-panel panel">
+          <h2 class="panel-title">生徒リスト</h2>
+          <div id="scheduleList" class="empty">校舎バッヂを選択してください。</div>
+        </section>
+        <section class="detail-panel panel">
+          <h2 class="panel-title">アカウント情報</h2>
+          <div id="accountDetail" class="empty">左の生徒リストから生徒を選択してください。</div>
+        </section>
+      </div>
+    </section>
+
+    <section id="studentMode" class="student-mode panel hidden">
+      <h2 class="panel-title">生徒ID検索</h2>
+      <div class="student-search">
+        <input id="studentIdInput" type="text" inputmode="numeric" placeholder="生徒IDを入力">
+        <button id="searchStudentButton" class="search-button" type="button">検索</button>
+      </div>
+      <div id="studentSearchResult" class="empty">生徒IDを入力して検索してください。</div>
+    </section>
+  </main>
+
+  <script>
+    const API_BASE = "https://le-on-assist.online/api/external";
+    const SCRATCH_URL = "https://scratch.mit.edu/";
+    const EXCLUDED_COURSE_IDS = new Set([1, 2, 5, 6]);
+    const QUARTER_TYPING_MONTHS = new Set([3, 6, 9, 12]);
+
+    const schools = [
+      { order: 1, id: "248", name: "四谷", color: "#ff9900" },
+      { order: 2, id: "247", name: "勝どき", color: "#ff0000" },
+      { order: 3, id: "261", name: "国分寺", color: "#00ff00" },
+      { order: 4, id: "249", name: "有明ガーデン", color: "#9900ff" },
+      { order: 5, id: "262", name: "文京", color: "#4a86e8" },
+      { order: 6, id: "250", name: "西葛西", color: "#000000" },
+      { order: 7, id: "251", name: "新小岩", color: "#ff00ff" },
+      { order: 8, id: "8", name: "西新", color: "#ff9900" },
+      { order: 9, id: "252", name: "博多祇園", color: "#ffdc00" },
+      { order: 10, id: "255", name: "堀江", color: "#239dda" },
+      { order: 11, id: "253", name: "本山", color: "#0000ff" },
+      { order: 12, id: "260", name: "築地口", color: "#980000" }
+    ];
+
+    const elements = {
+      scheduleModeButton: document.getElementById("scheduleModeButton"),
+      studentModeButton: document.getElementById("studentModeButton"),
+      typingButton: document.getElementById("typingButton"),
+      lessonDate: document.getElementById("lessonDate"),
+      apiSettings: document.getElementById("apiSettings"),
+      apiKeyInput: document.getElementById("apiKeyInput"),
+      saveApiKeyButton: document.getElementById("saveApiKeyButton"),
+      status: document.getElementById("status"),
+      scheduleMode: document.getElementById("scheduleMode"),
+      studentMode: document.getElementById("studentMode"),
+      schoolList: document.getElementById("schoolList"),
+      scheduleList: document.getElementById("scheduleList"),
+      accountDetail: document.getElementById("accountDetail"),
+      studentIdInput: document.getElementById("studentIdInput"),
+      searchStudentButton: document.getElementById("searchStudentButton"),
+      studentSearchResult: document.getElementById("studentSearchResult")
+    };
+
+    let activeSchoolId = "";
+    let activeBookingId = "";
+
+    function toDateInputValue(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function getApiKey() {
+      return elements.apiKeyInput.value.trim();
+    }
+
+    function setStatus(message, type = "") {
+      if (!elements.status) {
+        return;
+      }
+      elements.status.textContent = message;
+      elements.status.className = `status ${type}`.trim();
+    }
+
+    function requireApiKey() {
+      if (getApiKey()) {
+        return true;
+      }
+      setStatus("キーを入力して保存してください。", "error");
+      elements.apiSettings.classList.remove("hidden");
+      elements.apiKeyInput.focus();
+      return false;
+    }
+
+    async function fetchJson(url) {
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "X-LeON-Api-Key": getApiKey(),
+          "Accept": "application/json"
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`APIエラー: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (!data.ok) {
+        throw new Error("APIの返却結果が ok ではありません。");
+      }
+      return data;
+    }
+
+    function switchMode(mode) {
+      const isSchedule = mode === "schedule";
+      elements.scheduleMode.classList.toggle("hidden", !isSchedule);
+      elements.studentMode.classList.toggle("hidden", isSchedule);
+      elements.scheduleModeButton.classList.toggle("active", isSchedule);
+      elements.studentModeButton.classList.toggle("active", !isSchedule);
+      setStatus("");
+    }
+
+    function openTypingSite() {
+      const selectedDate = new Date(`${elements.lessonDate.value}T00:00:00`);
+      const month = selectedDate.getMonth() + 1;
+      const url = QUARTER_TYPING_MONTHS.has(month)
+        ? "https://sushida.net/play.html"
+        : "https://typing.playgram.jp/advanced";
+      window.open(url, "_blank", "noopener");
+    }
+
+    function renderSchools() {
+      elements.schoolList.innerHTML = "";
+      schools
+        .slice()
+        .sort((a, b) => a.order - b.order)
+        .forEach((school) => {
+          if (school.order === 8) {
+            const lineBreak = document.createElement("span");
+            lineBreak.className = "school-line-break";
+            elements.schoolList.appendChild(lineBreak);
+          }
+
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "school-badge";
+          button.textContent = school.name;
+          button.dataset.schoolId = school.id;
+          button.style.setProperty("--school-color", school.color);
+          button.style.setProperty("--school-contrast", getContrastColor(school.color));
+          button.addEventListener("click", () => loadSchedule(school));
+          elements.schoolList.appendChild(button);
+        });
+    }
+
+    function getContrastColor(hexColor) {
+      const hex = hexColor.replace("#", "");
+      const r = parseInt(hex.slice(0, 2), 16);
+      const g = parseInt(hex.slice(2, 4), 16);
+      const b = parseInt(hex.slice(4, 6), 16);
+      const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+      return brightness > 150 ? "#1f2937" : "#ffffff";
+    }
+
+    function setActiveSchool(id) {
+      activeSchoolId = id;
+      document.querySelectorAll(".school-badge").forEach((button) => {
+        button.classList.toggle("active", button.dataset.schoolId === id);
+      });
+    }
+
+    function formatTimeRange(booking) {
+      const start = new Date(booking.start_at);
+      const end = new Date(booking.end_at);
+      const format = new Intl.DateTimeFormat("ja-JP", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      });
+      return `${format.format(start)}-${format.format(end)}`;
+    }
+
+    function getStudentName(item) {
+      const student = item.student || {};
+      const booking = item.booking || {};
+      const fullName = `${student.last_name || ""}${student.first_name || ""}`.trim();
+      return fullName || booking.child_name || `生徒ID: ${booking.external_student_id || ""}`;
+    }
+
+    function groupByTime(items) {
+      return items.reduce((groups, item) => {
+        const key = formatTimeRange(item.booking);
+        if (!groups.has(key)) {
+          groups.set(key, []);
+        }
+        groups.get(key).push(item);
+        return groups;
+      }, new Map());
+    }
+
+    async function loadSchedule(school) {
+      if (!requireApiKey()) {
+        return;
+      }
+
+      setActiveSchool(school.id);
+      activeBookingId = "";
+      elements.scheduleList.className = "empty";
+      elements.scheduleList.textContent = "スケジュールを取得しています。";
+      elements.accountDetail.className = "empty";
+      elements.accountDetail.textContent = "左の生徒リストから生徒を選択してください。";
+      setStatus(`${school.name} のスケジュールを照会中です。`);
+
+      try {
+        const params = new URLSearchParams({
+          date: elements.lessonDate.value,
+          external_shop_id: school.id
+        });
+        const data = await fetchJson(`${API_BASE}/schedule-lesson-accounts?${params}`);
+        const displayItems = (data.items || []).filter((item) => {
+          const courseId = Number(item.course && item.course.id);
+          return !EXCLUDED_COURSE_IDS.has(courseId);
+        });
+
+        renderScheduleList(displayItems);
+        setStatus("");
+      } catch (error) {
+        elements.scheduleList.className = "empty error";
+        elements.scheduleList.textContent = error.message;
+        setStatus("スケジュール取得に失敗しました。キー、日付、校舎を確認してください。", "error");
+      }
+    }
+
+    function renderScheduleList(items) {
+      elements.scheduleList.innerHTML = "";
+      elements.scheduleList.className = "";
+
+      if (!items.length) {
+        elements.scheduleList.className = "empty";
+        elements.scheduleList.textContent = "表示対象の生徒はいません。";
+        return;
+      }
+
+      const groups = groupByTime(items);
+      groups.forEach((groupItems, timeRange) => {
+        const group = document.createElement("div");
+        group.className = "time-group";
+
+        const label = document.createElement("h3");
+        label.className = "time-label";
+        label.textContent = timeRange;
+        group.appendChild(label);
+
+        groupItems.forEach((item) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "student-card";
+          button.dataset.bookingId = String(item.booking && item.booking.booking_id);
+
+          const name = document.createElement("span");
+          name.className = "student-name";
+          name.textContent = getStudentName(item);
+
+          const course = document.createElement("span");
+          course.className = "course-chip";
+          course.textContent = (item.course && item.course.course_name) || (item.booking && item.booking.external_course_name) || "course";
+          if (item.course && item.course.color_code) {
+            course.style.backgroundColor = item.course.color_code;
+          }
+
+          button.append(name, course);
+          button.addEventListener("click", () => {
+            activeBookingId = button.dataset.bookingId;
+            document.querySelectorAll(".student-card").forEach((card) => {
+              card.classList.toggle("active", card.dataset.bookingId === activeBookingId);
+            });
+            renderAccountDetail(item);
+          });
+          group.appendChild(button);
+        });
+
+        elements.scheduleList.appendChild(group);
+      });
+    }
+
+    function createCopyField(value, label = "", buttonPosition = "right") {
+      const wrapper = document.createElement("div");
+      wrapper.className = "copy-field";
+      if (buttonPosition === "left") {
+        wrapper.classList.add("copy-field-left");
+      }
+
+      const text = document.createElement("span");
+      text.className = "copy-field-value";
+      text.textContent = `${label}${value || "-"}`;
+
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "copy-button";
+      button.textContent = "コピー";
+      button.addEventListener("click", () => copyToClipboard(value || ""));
+
+      if (buttonPosition === "left") {
+        wrapper.append(button, text);
+      } else {
+        wrapper.append(text, button);
+      }
+      return wrapper;
+    }
+
+    function renderAccountDetail(item) {
+      const account = item.lesson_account || {};
+      const course = item.course || {};
+      const booking = item.booking || {};
+      const studentName = getStudentName(item);
+
+      elements.accountDetail.className = "";
+      elements.accountDetail.innerHTML = "";
+
+      const grid = document.createElement("div");
+      grid.className = "account-grid";
+      [
+        ["生徒", studentName],
+        ["外部生徒ID", booking.external_student_id || ""],
+        ["コース", course.course_name || booking.external_course_name || ""],
+        ["アカウント", account.account_id || ""],
+        ["パスワード", account.account_password || ""]
+      ].forEach(([label, value]) => {
+        const labelCell = document.createElement("div");
+        labelCell.textContent = label;
+        const valueCell = document.createElement("div");
+        if (label === "アカウント" || label === "パスワード") {
+          valueCell.appendChild(createCopyField(value, "", "left"));
+        } else {
+          valueCell.textContent = value || "-";
+        }
+        grid.append(labelCell, valueCell);
+      });
+
+      elements.accountDetail.appendChild(grid);
+
+      if (Number(course.id) === 4 || Number(account.course_id) === 4) {
+        elements.accountDetail.appendChild(createScratchButton());
+      }
+    }
+
+    async function copyToClipboard(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+        setStatus("クリップボードにコピーしました。", "success");
+      } catch (error) {
+        setStatus("コピーに失敗しました。ブラウザの権限設定を確認してください。", "error");
+      }
+    }
+
+    function createScratchButton() {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "scratch-button";
+      button.textContent = "Scratchをひらく";
+      button.addEventListener("click", () => window.open(SCRATCH_URL, "_blank", "noopener"));
+      return button;
+    }
+
+    async function searchStudentAccounts() {
+      if (!requireApiKey()) {
+        return;
+      }
+
+      const externalStudentId = elements.studentIdInput.value.trim();
+      if (!externalStudentId) {
+        setStatus("生徒IDを入力してください。", "error");
+        elements.studentIdInput.focus();
+        return;
+      }
+
+      elements.studentSearchResult.className = "empty";
+      elements.studentSearchResult.textContent = "検索しています。";
+      setStatus(`生徒ID ${externalStudentId} を検索中です。`);
+
+      try {
+        const data = await fetchJson(`${API_BASE}/students/${encodeURIComponent(externalStudentId)}/lesson-accounts`);
+        renderStudentSearchResult(data.items || []);
+        setStatus("");
+      } catch (error) {
+        elements.studentSearchResult.className = "empty error";
+        elements.studentSearchResult.textContent = error.message;
+        setStatus("生徒ID検索に失敗しました。キーと生徒IDを確認してください。", "error");
+      }
+    }
+
+    function flattenStudentAccounts(items) {
+      const rows = [];
+      items.forEach((item) => {
+        (item.services || []).forEach((service) => {
+          (service.accounts || []).forEach((account) => {
+            rows.push({
+              serviceName: service.service_name || account.service_name || "",
+              account
+            });
+          });
+        });
+      });
+      return rows;
+    }
+
+    function renderStudentSearchResult(items) {
+      const rows = flattenStudentAccounts(items);
+      elements.studentSearchResult.innerHTML = "";
+      elements.studentSearchResult.className = "";
+
+      if (!rows.length) {
+        elements.studentSearchResult.className = "empty";
+        elements.studentSearchResult.textContent = "アカウント情報が見つかりませんでした。";
+        return;
+      }
+
+      const table = document.createElement("table");
+      table.className = "student-account-table";
+      const colgroup = document.createElement("colgroup");
+      ["course-column", "label-column", "value-column"].forEach((className) => {
+        const col = document.createElement("col");
+        col.className = className;
+        colgroup.appendChild(col);
+      });
+      const thead = document.createElement("thead");
+      thead.innerHTML = "<tr><th>受講中のコース名</th><th colspan=\"2\">アカウント情報</th></tr>";
+
+      const tbody = document.createElement("tbody");
+      rows.forEach((row) => {
+        const tr = document.createElement("tr");
+        tr.className = "account-row-start";
+        const passwordTr = document.createElement("tr");
+
+        const courseCell = document.createElement("td");
+        courseCell.rowSpan = 2;
+        const courseName = document.createElement("div");
+        courseName.className = "course-cell-name";
+        courseName.textContent = row.serviceName || "-";
+        courseCell.appendChild(courseName);
+        if (Number(row.account.course_id) === 4) {
+          courseCell.appendChild(createScratchButton());
+        }
+
+        const accountLabelCell = document.createElement("td");
+        accountLabelCell.className = "account-label-cell";
+        accountLabelCell.textContent = "アカウント";
+
+        const accountValueCell = document.createElement("td");
+        accountValueCell.appendChild(createCopyField(row.account.account_id || "", "", "left"));
+
+        const passwordLabelCell = document.createElement("td");
+        passwordLabelCell.className = "account-label-cell";
+        passwordLabelCell.textContent = "PW";
+
+        const passwordValueCell = document.createElement("td");
+        passwordValueCell.appendChild(createCopyField(row.account.account_password || "", "", "left"));
+
+        tr.append(courseCell, accountLabelCell, accountValueCell);
+        passwordTr.append(passwordLabelCell, passwordValueCell);
+        tbody.appendChild(tr);
+        tbody.appendChild(passwordTr);
+      });
+
+      table.append(colgroup, thead, tbody);
+      elements.studentSearchResult.appendChild(table);
+    }
+
+    function saveApiKey() {
+      const key = getApiKey();
+      if (!key) {
+        setStatus("キーを入力してください。", "error");
+        elements.apiKeyInput.focus();
+        return;
+      }
+      localStorage.setItem("leonApiKey", key);
+      elements.apiSettings.classList.add("hidden");
+      setStatus("");
+    }
+
+    function handleDateChange() {
+      if (activeSchoolId) {
+        const school = schools.find((item) => item.id === activeSchoolId);
+        if (school) {
+          loadSchedule(school);
+        }
+      }
+    }
+
+    function init() {
+      elements.lessonDate.value = toDateInputValue(new Date());
+      elements.apiKeyInput.value = localStorage.getItem("leonApiKey") || "";
+      elements.apiSettings.classList.toggle("hidden", Boolean(getApiKey()));
+      renderSchools();
+
+      elements.scheduleModeButton.addEventListener("click", () => switchMode("schedule"));
+      elements.studentModeButton.addEventListener("click", () => switchMode("student"));
+      elements.typingButton.addEventListener("click", openTypingSite);
+      elements.saveApiKeyButton.addEventListener("click", saveApiKey);
+      elements.searchStudentButton.addEventListener("click", searchStudentAccounts);
+      elements.studentIdInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          searchStudentAccounts();
+        }
+      });
+      elements.lessonDate.addEventListener("change", handleDateChange);
+    }
+
+    init();
+  </script>
+</body>
+</html>
