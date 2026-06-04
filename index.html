@@ -198,13 +198,6 @@
       font-weight: 700;
     }
 
-    .status {
-      min-height: 22px;
-      margin: -8px 0 16px;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-
     .password-gate {
       position: fixed;
       inset: 0;
@@ -631,7 +624,6 @@
       <input id="apiKeyInput" type="password" autocomplete="off" placeholder="Key">
       <button id="saveAuthButton" class="secondary-button" type="button">保存</button>
     </section>
-    <div id="status" class="status" aria-live="polite"></div>
 
     <section id="scheduleMode">
       <div id="schoolList" class="schools panel"></div>
@@ -689,7 +681,6 @@
       apiSettings: document.getElementById("apiSettings"),
       apiKeyInput: document.getElementById("apiKeyInput"),
       saveAuthButton: document.getElementById("saveAuthButton"),
-      status: document.getElementById("status"),
       scheduleMode: document.getElementById("scheduleMode"),
       studentMode: document.getElementById("studentMode"),
       schoolList: document.getElementById("schoolList"),
@@ -726,19 +717,10 @@
       }).trim();
     }
 
-    function setStatus(message, type = "") {
-      if (!elements.status) {
-        return;
-      }
-      elements.status.textContent = message;
-      elements.status.className = `status ${type}`.trim();
-    }
-
     function requireAuth() {
       if (getApiKey() && getLpasPassword()) {
         return true;
       }
-      setStatus("キーとL-PASパスワードを入力して保存してください", "error");
       if (!getApiKey()) {
         elements.apiSettings.classList.remove("hidden");
         elements.apiKeyInput.focus();
@@ -755,13 +737,11 @@
       elements.passwordGate.classList.remove("hidden");
       elements.passwordGateInput.value = "";
       elements.passwordGateInput.focus();
-      setStatus("L-PASパスワードを入力してください", "error");
     }
 
     function unlockWithPassword(password) {
       lpasPassword = password;
       elements.passwordGate.classList.add("hidden");
-      setStatus("");
       window.clearTimeout(passwordTimerId);
       passwordTimerId = window.setTimeout(showPasswordGate, 5 * 60 * 1000);
     }
@@ -770,7 +750,6 @@
       event.preventDefault();
       const password = normalizeNumericPassword(elements.passwordGateInput.value);
       if (!password) {
-        setStatus("L-PASパスワードを入力してください", "error");
         elements.passwordGateInput.focus();
         return;
       }
@@ -804,7 +783,6 @@
       elements.studentMode.classList.toggle("hidden", isSchedule);
       elements.scheduleModeButton.classList.toggle("active", isSchedule);
       elements.studentModeButton.classList.toggle("active", !isSchedule);
-      setStatus("");
     }
 
     function openTypingSite() {
@@ -896,7 +874,6 @@
       elements.scheduleList.textContent = "スケジュールを取得しています";
       elements.accountDetail.className = "empty";
       elements.accountDetail.textContent = "左の生徒リストから生徒を選択してください";
-      setStatus(`${school.name} のスケジュールを照会中です`);
 
       try {
         const params = new URLSearchParams({
@@ -910,11 +887,9 @@
         });
 
         renderScheduleList(displayItems);
-        setStatus("");
       } catch (error) {
         elements.scheduleList.className = "empty error";
         elements.scheduleList.textContent = error.message;
-        setStatus("スケジュール取得に失敗しましたキー、L-PASパスワード、日付、校舎を確認してください", "error");
       }
     }
 
@@ -1034,9 +1009,7 @@
     async function copyToClipboard(text) {
       try {
         await navigator.clipboard.writeText(text);
-        setStatus("クリップボードにコピーしました", "success");
       } catch (error) {
-        setStatus("コピーに失敗しましたブラウザの権限設定を確認してください", "error");
       }
     }
 
@@ -1056,23 +1029,19 @@
 
       const externalStudentId = elements.studentIdInput.value.trim();
       if (!externalStudentId) {
-        setStatus("生徒IDを入力してください", "error");
         elements.studentIdInput.focus();
         return;
       }
 
       elements.studentSearchResult.className = "empty";
       elements.studentSearchResult.textContent = "検索しています";
-      setStatus(`生徒ID ${externalStudentId} を検索中です`);
 
       try {
         const data = await fetchJson(`${API_BASE}/students/${encodeURIComponent(externalStudentId)}/lesson-accounts`);
         renderStudentSearchResult(data.items || []);
-        setStatus("");
       } catch (error) {
         elements.studentSearchResult.className = "empty error";
         elements.studentSearchResult.textContent = error.message;
-        setStatus("生徒ID検索に失敗しましたキー、L-PASパスワード、生徒IDを確認してください", "error");
       }
     }
 
@@ -1156,13 +1125,11 @@
     function saveAuth() {
       const key = getApiKey();
       if (!key) {
-        setStatus("キーを入力してください", "error");
         elements.apiKeyInput.focus();
         return;
       }
       localStorage.setItem("leonApiKey", key);
       elements.apiSettings.classList.add("hidden");
-      setStatus("");
     }
 
     function handleDateChange() {
