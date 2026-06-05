@@ -337,8 +337,7 @@
       flex-direction: column;
     }
 
-    .detail-panel,
-    .student-mode {
+    .detail-panel {
       overflow: auto;
     }
 
@@ -351,14 +350,23 @@
     }
 
     #studentMode {
+      display: flex;
       min-height: 0;
       flex: 1;
+      flex-direction: column;
       overflow: hidden;
     }
 
+    #scheduleMode.hidden,
+    #studentMode.hidden {
+      display: none;
+    }
+
     #studentSearchResult {
-      max-height: calc(100vh - 190px);
-      overflow: auto;
+      min-height: 0;
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
     }
 
     #scheduleList {
@@ -489,6 +497,15 @@
       font-weight: 800;
     }
 
+    .student-result-name {
+      min-width: 0;
+      color: var(--text);
+      font-size: 16px;
+      font-weight: 800;
+      line-height: 1.4;
+      overflow-wrap: anywhere;
+    }
+
     .copy-button,
     .scratch-button,
     .search-button {
@@ -525,10 +542,11 @@
 
     .student-search {
       display: grid;
-      width: min(360px, 33%);
+      width: min(760px, 100%);
       min-width: 300px;
-      grid-template-columns: minmax(180px, 1fr) auto;
-      gap: 10px;
+      grid-template-columns: minmax(180px, 260px) auto minmax(240px, 1fr);
+      gap: 10px 24px;
+      align-items: center;
       margin-bottom: 16px;
     }
 
@@ -695,6 +713,7 @@
       <div class="student-search">
         <input id="studentIdInput" type="text" inputmode="numeric" placeholder="生徒IDを入力">
         <button id="searchStudentButton" class="search-button" type="button">検索</button>
+        <div id="studentResultName" class="student-result-name" aria-live="polite"></div>
       </div>
       <div id="studentSearchResult" class="empty">生徒IDを入力して検索してください</div>
     </section>
@@ -740,6 +759,7 @@
       accountDetail: document.getElementById("accountDetail"),
       studentIdInput: document.getElementById("studentIdInput"),
       searchStudentButton: document.getElementById("searchStudentButton"),
+      studentResultName: document.getElementById("studentResultName"),
       studentSearchResult: document.getElementById("studentSearchResult")
     };
 
@@ -1147,6 +1167,7 @@
 
       elements.studentSearchResult.className = "empty";
       elements.studentSearchResult.textContent = "検索しています";
+      elements.studentResultName.textContent = "";
 
       try {
         const data = await fetchJson(`${API_BASE}/students/${encodeURIComponent(externalStudentId)}/lesson-accounts`);
@@ -1154,6 +1175,7 @@
       } catch (error) {
         elements.studentSearchResult.className = "empty error";
         elements.studentSearchResult.textContent = error.message;
+        elements.studentResultName.textContent = "";
       }
     }
 
@@ -1172,10 +1194,26 @@
       return rows;
     }
 
+    function getStudentSearchName(items) {
+      for (const item of items) {
+        const student = item.student || item;
+        const fullName = `${student.last_name || ""}${student.first_name || ""}`.trim();
+        if (fullName) {
+          return fullName;
+        }
+        if (student.name || student.full_name || student.child_name) {
+          return student.name || student.full_name || student.child_name;
+        }
+      }
+      return "";
+    }
+
     function renderStudentSearchResult(items) {
       const rows = flattenStudentAccounts(items);
+      const studentName = getStudentSearchName(items);
       elements.studentSearchResult.innerHTML = "";
       elements.studentSearchResult.className = "";
+      elements.studentResultName.textContent = studentName ? `検索結果：${studentName}` : "";
 
       if (!rows.length) {
         elements.studentSearchResult.className = "empty";
