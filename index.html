@@ -227,15 +227,10 @@
       box-shadow: 0 20px 45px rgba(16, 24, 40, 0.22);
     }
 
-    .password-dialog h1 {
-      margin: 0 0 14px;
-      font-size: 20px;
-      line-height: 1.35;
-    }
+
 
     .password-dialog form {
       display: grid;
-      gap: 10px;
     }
 
     .password-dialog input {
@@ -257,6 +252,10 @@
       font-size: 13px;
       font-weight: 700;
       line-height: 1.5;
+    }
+
+    .masked-input {
+      -webkit-text-security: disc;
     }
 
     .panel {
@@ -668,11 +667,10 @@
 <body>
   <div id="passwordGate" class="password-gate" role="dialog" aria-modal="true" aria-labelledby="passwordGateTitle">
     <div class="password-dialog">
-      <h1 id="passwordGateTitle">L-PASパスワード</h1>
       <form id="passwordGateForm" autocomplete="off">
-        <input id="passwordGateInput" type="password" inputmode="numeric" autocomplete="new-password" autocapitalize="off" spellcheck="false" readonly placeholder="現在のL-PASパスワード" aria-describedby="passwordGateError">
+        <input id="passwordGateInput" class="masked-input" type="text" name="lpas_access_code_input" inputmode="numeric" autocomplete="off" autocapitalize="off" spellcheck="false" readonly aria-describedby="passwordGateError">
         <div id="passwordGateError" class="password-error" role="alert"></div>
-        <button class="secondary-button" type="submit">ログイン</button>
+        <button class="secondary-button" type="submit">認証</button>
       </form>
     </div>
   </div>
@@ -690,7 +688,7 @@
     </div>
 
     <section id="apiSettings" class="settings" aria-label="認証設定">
-      <input id="apiKeyInput" type="password" autocomplete="new-password" autocapitalize="off" spellcheck="false" placeholder="Key">
+      <input id="apiKeyInput" class="masked-input" type="text" name="external_access_key_input" autocomplete="off" inputmode="text" autocapitalize="off" spellcheck="false" placeholder="Key">
       <button id="saveAuthButton" class="secondary-button" type="button">保存</button>
     </section>
 
@@ -884,7 +882,7 @@
         elements.passwordGateInput.focus();
       } finally {
         submitButton.disabled = false;
-        submitButton.textContent = "ログイン";
+        submitButton.textContent = "認証";
       }
     }
 
