@@ -23,9 +23,15 @@
       box-sizing: border-box;
     }
 
+    html,
+    body {
+      height: 100%;
+    }
+
     body {
       margin: 0;
-      min-height: 100vh;
+      height: 100vh;
+      overflow: hidden;
       color: var(--text);
       background: var(--bg);
     }
@@ -53,8 +59,12 @@
 
     .app {
       width: min(1180px, calc(100% - 32px));
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
       margin: 0 auto;
-      padding: 28px 0 40px;
+      padding: 18px 0 20px;
     }
 
     .topbar {
@@ -258,39 +268,46 @@
 
     .schools {
       display: flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       justify-content: center;
       align-items: center;
-      gap: 10px;
-      padding: 14px;
-      margin-bottom: 16px;
+      gap: 6px;
+      min-width: 0;
+      overflow: hidden;
+      padding: 8px;
+      margin-bottom: 10px;
     }
 
     .school-badge {
-      min-height: 38px;
+      min-height: 32px;
       display: inline-flex;
+      flex: 0 1 auto;
       align-items: center;
-      gap: 8px;
-      padding: 8px 14px;
+      gap: 6px;
+      min-width: 0;
+      padding: 6px 8px;
       color: var(--text);
       background: #fff;
       border: 2px solid var(--school-color, #b9dce7);
       border-radius: 999px;
+      font-size: 13px;
       font-weight: 700;
+      line-height: 1.2;
       box-shadow: none;
+      white-space: nowrap;
     }
 
     .school-badge::before {
-      width: 10px;
-      height: 10px;
+      flex: 0 0 auto;
+      width: 8px;
+      height: 8px;
       content: "";
       background: var(--school-color, var(--brand));
       border-radius: 50%;
     }
 
     .school-line-break {
-      flex-basis: 100%;
-      height: 0;
+      display: none;
     }
 
     .school-badge:hover,
@@ -304,19 +321,44 @@
       display: grid;
       grid-template-columns: minmax(300px, 420px) minmax(0, 1fr);
       gap: 16px;
+      min-height: 0;
+      flex: 1;
     }
 
     .list-panel,
     .detail-panel,
     .student-mode {
-      min-height: 420px;
+      min-height: 0;
       padding: 16px;
     }
 
     .list-panel {
       display: flex;
-      max-height: calc(100vh - 230px);
       flex-direction: column;
+    }
+
+    .detail-panel,
+    .student-mode {
+      overflow: auto;
+    }
+
+    #scheduleMode {
+      display: flex;
+      min-height: 0;
+      flex: 1;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #studentMode {
+      min-height: 0;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    #studentSearchResult {
+      max-height: calc(100vh - 190px);
+      overflow: auto;
     }
 
     #scheduleList {
