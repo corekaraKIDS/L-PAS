@@ -241,6 +241,14 @@
       box-shadow: 0 0 0 3px rgba(29, 111, 143, 0.14);
     }
 
+    .password-error {
+      min-height: 20px;
+      color: #b42318;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.5;
+    }
+
     .panel {
       background: var(--panel);
       border: 1px solid var(--line);
@@ -601,8 +609,9 @@
   <div id="passwordGate" class="password-gate" role="dialog" aria-modal="true" aria-labelledby="passwordGateTitle">
     <div class="password-dialog">
       <h1 id="passwordGateTitle">L-PASパスワード</h1>
-      <form id="passwordGateForm">
-        <input id="passwordGateInput" type="password" inputmode="numeric" autocomplete="off" placeholder="現在のL-PASパスワード">
+      <form id="passwordGateForm" autocomplete="off">
+        <input id="passwordGateInput" type="password" inputmode="numeric" autocomplete="new-password" autocapitalize="off" spellcheck="false" readonly placeholder="現在のL-PASパスワード" aria-describedby="passwordGateError">
+        <div id="passwordGateError" class="password-error" role="alert"></div>
         <button class="secondary-button" type="submit">ログイン</button>
       </form>
     </div>
@@ -621,7 +630,7 @@
     </div>
 
     <section id="apiSettings" class="settings" aria-label="認証設定">
-      <input id="apiKeyInput" type="password" autocomplete="off" placeholder="Key">
+      <input id="apiKeyInput" type="password" autocomplete="new-password" autocapitalize="off" spellcheck="false" placeholder="Key">
       <button id="saveAuthButton" class="secondary-button" type="button">保存</button>
     </section>
 
@@ -678,6 +687,7 @@
       passwordGate: document.getElementById("passwordGate"),
       passwordGateForm: document.getElementById("passwordGateForm"),
       passwordGateInput: document.getElementById("passwordGateInput"),
+      passwordGateError: document.getElementById("passwordGateError"),
       apiSettings: document.getElementById("apiSettings"),
       apiKeyInput: document.getElementById("apiKeyInput"),
       saveAuthButton: document.getElementById("saveAuthButton"),
@@ -736,7 +746,17 @@
       passwordTimerId = 0;
       elements.passwordGate.classList.remove("hidden");
       elements.passwordGateInput.value = "";
+      setPasswordError("");
+      elements.passwordGateInput.setAttribute("readonly", "");
       elements.passwordGateInput.focus();
+    }
+
+    function enablePasswordInput() {
+      elements.passwordGateInput.removeAttribute("readonly");
+    }
+
+    function setPasswordError(message) {
+      elements.passwordGateError.textContent = message;
     }
 
     function unlockWithPassword(password) {
@@ -746,14 +766,64 @@
       passwordTimerId = window.setTimeout(showPasswordGate, 5 * 60 * 1000);
     }
 
-    function handlePasswordGateSubmit(event) {
+    async function validateLpasPassword(password) {
+      const apiKey = getApiKey();
+      if (!apiKey) {
+        throw new Error("先にKeyを入力して保存してください");
+      }
+
+      const params = new URLSearchParams({
+        date: elements.lessonDate.value,
+        external_shop_id: schools[0].id
+      });
+      const response = await fetch(`${API_BASE}/schedule-lesson-accounts?${params}`, {
+        method: "GET",
+        headers: {
+          "Accept": "application/json",
+          "X-LeON-Api-Key": apiKey,
+          "X-LPAS-Password": password
+        }
+      });
+
+      if (response.status === 401 || response.status === 403) {
+        throw new Error("パスワードが違います");
+      }
+      if (!response.ok) {
+        throw new Error(`APIエラー: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (!data.ok) {
+        throw new Error("パスワードが違います");
+      }
+    }
+
+    async function handlePasswordGateSubmit(event) {
       event.preventDefault();
       const password = normalizeNumericPassword(elements.passwordGateInput.value);
       if (!password) {
+        setPasswordError("パスワードを入力してください");
         elements.passwordGateInput.focus();
         return;
       }
-      unlockWithPassword(password);
+
+      const submitButton = elements.passwordGateForm.querySelector("button[type=\"submit\"]");
+      setPasswordError("");
+      submitButton.disabled = true;
+      submitButton.textContent = "確認中";
+
+      try {
+        await validateLpasPassword(password);
+        unlockWithPassword(password);
+      } catch (error) {
+        setPasswordError(error.message);
+        elements.passwordGateInput.value = "";
+        elements.passwordGateInput.setAttribute("readonly", "");
+        elements.passwordGateInput.focus();
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = "ログイン";
+      }
     }
 
     async function fetchJson(url) {
@@ -1130,6 +1200,9 @@
       }
       localStorage.setItem("leonApiKey", key);
       elements.apiSettings.classList.add("hidden");
+      if (!getLpasPassword()) {
+        showPasswordGate();
+      }
     }
 
     function handleDateChange() {
@@ -1146,10 +1219,14 @@
       elements.apiKeyInput.value = localStorage.getItem("leonApiKey") || "";
       localStorage.removeItem("lpasPassword");
       elements.apiSettings.classList.toggle("hidden", Boolean(getApiKey()));
+      elements.passwordGate.classList.toggle("hidden", !getApiKey());
       renderSchools();
-      elements.passwordGateInput.focus();
 
       elements.passwordGateForm.addEventListener("submit", handlePasswordGateSubmit);
+      elements.passwordGateInput.addEventListener("pointerdown", enablePasswordInput);
+      elements.passwordGateInput.addEventListener("keydown", enablePasswordInput);
+      elements.passwordGateInput.addEventListener("paste", enablePasswordInput);
+      elements.passwordGateInput.addEventListener("touchstart", enablePasswordInput);
       elements.scheduleModeButton.addEventListener("click", () => switchMode("schedule"));
       elements.studentModeButton.addEventListener("click", () => switchMode("student"));
       elements.typingButton.addEventListener("click", openTypingSite);
@@ -1161,6 +1238,11 @@
         }
       });
       elements.lessonDate.addEventListener("change", handleDateChange);
+      if (getApiKey()) {
+        elements.passwordGateInput.focus();
+      } else {
+        elements.apiKeyInput.focus();
+      }
     }
 
     init();
