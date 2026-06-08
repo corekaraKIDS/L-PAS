@@ -1016,18 +1016,63 @@
           return !EXCLUDED_COURSE_IDS.has(courseId);
         });
 
-        renderScheduleList(displayItems);
+        renderScheduleList(displayItems, data.trial_stock_accounts || []);
       } catch (error) {
         elements.scheduleList.className = "empty error";
         elements.scheduleList.textContent = error.message;
       }
     }
 
-    function renderScheduleList(items) {
+    function getTrialAccountName(index, total) {
+      return total > 1 ? `体験用アカウント - ${index + 1}` : "体験用アカウント";
+    }
+
+    function renderTrialAccountCards(trialAccounts) {
+      if (!trialAccounts.length) {
+        return;
+      }
+
+      const group = document.createElement("div");
+      group.className = "time-group";
+
+      const label = document.createElement("h3");
+      label.className = "time-label";
+      label.textContent = "体験用アカウント";
+      group.appendChild(label);
+
+      trialAccounts.forEach((account, index) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "student-card";
+        button.dataset.bookingId = `trial-${account.id || account.stock_account_id || index}`;
+
+        const name = document.createElement("span");
+        name.className = "student-name";
+        name.textContent = getTrialAccountName(index, trialAccounts.length);
+
+        const course = document.createElement("span");
+        course.className = "course-chip";
+        course.textContent = account.service_name || "体験";
+
+        button.append(name, course);
+        button.addEventListener("click", () => {
+          activeBookingId = button.dataset.bookingId;
+          document.querySelectorAll(".student-card").forEach((card) => {
+            card.classList.toggle("active", card.dataset.bookingId === activeBookingId);
+          });
+          renderTrialAccountDetail(account, name.textContent);
+        });
+        group.appendChild(button);
+      });
+
+      elements.scheduleList.appendChild(group);
+    }
+
+    function renderScheduleList(items, trialAccounts = []) {
       elements.scheduleList.innerHTML = "";
       elements.scheduleList.className = "";
 
-      if (!items.length) {
+      if (!items.length && !trialAccounts.length) {
         elements.scheduleList.className = "empty";
         elements.scheduleList.textContent = "表示対象の生徒はいません";
         return;
@@ -1073,6 +1118,8 @@
 
         elements.scheduleList.appendChild(group);
       });
+
+      renderTrialAccountCards(trialAccounts);
     }
 
     function createCopyField(value, label = "", buttonPosition = "right") {
@@ -1134,6 +1181,33 @@
       if (Number(course.id) === 4 || Number(account.course_id) === 4) {
         elements.accountDetail.appendChild(createScratchButton());
       }
+    }
+
+    function renderTrialAccountDetail(account, trialName) {
+      elements.accountDetail.className = "";
+      elements.accountDetail.innerHTML = "";
+
+      const grid = document.createElement("div");
+      grid.className = "account-grid";
+      [
+        ["生徒", trialName],
+        ["生徒ID", ""],
+        ["コース", account.service_name || ""],
+        ["アカウント", account.account_id || ""],
+        ["パスワード", account.account_password || ""]
+      ].forEach(([label, value]) => {
+        const labelCell = document.createElement("div");
+        labelCell.textContent = label;
+        const valueCell = document.createElement("div");
+        if (label === "アカウント" || label === "パスワード") {
+          valueCell.appendChild(createCopyField(value, "", "left"));
+        } else {
+          valueCell.textContent = value || "-";
+        }
+        grid.append(labelCell, valueCell);
+      });
+
+      elements.accountDetail.appendChild(grid);
     }
 
     async function copyToClipboard(text) {
