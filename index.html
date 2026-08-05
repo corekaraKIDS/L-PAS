@@ -720,6 +720,7 @@
   <script>
     const API_BASE = "https://le-on-assist.online/api/external";
     const SCRATCH_URL = "https://scratch.mit.edu/";
+    const TRIAL_SELECTION_ID = "trial";
     const EXCLUDED_COURSE_IDS = new Set([1, 2, 5, 6]);
     const QUARTER_TYPING_MONTHS = new Set([3, 6, 9, 12]);
 
@@ -946,6 +947,16 @@
           button.addEventListener("click", () => loadSchedule(school));
           elements.schoolList.appendChild(button);
         });
+
+      const trialButton = document.createElement("button");
+      trialButton.type = "button";
+      trialButton.className = "school-badge";
+      trialButton.textContent = "体験・研修";
+      trialButton.dataset.schoolId = TRIAL_SELECTION_ID;
+      trialButton.style.setProperty("--school-color", "#8b3f9f");
+      trialButton.style.setProperty("--school-contrast", "#ffffff");
+      trialButton.addEventListener("click", loadTrialAccounts);
+      elements.schoolList.appendChild(trialButton);
     }
 
     function getContrastColor(hexColor) {
@@ -1016,7 +1027,7 @@
           return !EXCLUDED_COURSE_IDS.has(courseId);
         });
 
-        renderScheduleList(displayItems, data.trial_stock_accounts || []);
+        renderScheduleList(displayItems);
       } catch (error) {
         elements.scheduleList.className = "empty error";
         elements.scheduleList.textContent = error.message;
@@ -1180,6 +1191,28 @@
 
       if (Number(course.id) === 4 || Number(account.course_id) === 4) {
         elements.accountDetail.appendChild(createScratchButton());
+      }
+    }
+
+    async function loadTrialAccounts() {
+      if (!requireAuth()) {
+        return;
+      }
+
+      setActiveSchool(TRIAL_SELECTION_ID);
+      activeBookingId = "";
+      elements.scheduleList.className = "empty";
+      elements.scheduleList.textContent = "体験・研修用アカウントを取得しています";
+      elements.accountDetail.className = "empty";
+      elements.accountDetail.textContent = "左のアカウントリストからアカウントを選択してください";
+
+      try {
+        const params = new URLSearchParams({ for_trial: "true" });
+        const data = await fetchJson(`${API_BASE}/schedule-lesson-accounts?${params}`);
+        renderScheduleList([], data.trial_stock_accounts || []);
+      } catch (error) {
+        elements.scheduleList.className = "empty error";
+        elements.scheduleList.textContent = error.message;
       }
     }
 
@@ -1358,6 +1391,10 @@
     }
 
     function handleDateChange() {
+      if (activeSchoolId === TRIAL_SELECTION_ID) {
+        loadTrialAccounts();
+        return;
+      }
       if (activeSchoolId) {
         const school = schools.find((item) => item.id === activeSchoolId);
         if (school) {
